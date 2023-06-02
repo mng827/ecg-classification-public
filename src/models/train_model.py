@@ -75,6 +75,9 @@ def main(cfg):
                 train_dataloaders=train_loader,
                 val_dataloaders=val_loader)
 
+    # TODO: We should probably move this code to test the model on a separate
+    # script and run it only on the model we chose after running the hyperparameter
+    # sweep.
     trainer.test(model=lightning_module, dataloaders=test_loader)
 
 

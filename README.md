@@ -3,11 +3,18 @@ ecg-classification
 
 ECG heartbeat classification
 
-To run the code:
-```
+Install the required packages: `pip install -r requirements.txt`.
+The main requirements are: PyTorch, MLflow, Hydra, and PyTorch Lightning
 
+To train a model with hyperparameter sweeps:
+```
 PYTHONPATH=src python src/models/train_model.py -m train.lr=3e-4,1e-3 train.batch_size=128,64
 ```
+
+You should see a `mlruns` folder after running an experiment. Use `mlflow ui` to
+view the MLflow dashboard.
+
+A short report is in `reports/REPORT.md`
 
 Project Organization
 ------------
