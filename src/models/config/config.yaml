@@ -1,0 +1,16 @@
+model:
+  input_channels: 1
+  num_conv_blocks: 3
+  hidden_features: 256
+  num_classes: 5
+  kernel_size: 5
+
+train:
+  batch_size: 512
+  num_epochs: 50
+  lr: 3e-4
+  weight_decay: 1e-2
+
+data:
+  train_csv: data/raw/mitbih_train.csv
+  test_csv: data/raw/mitbih_test.csv
