@@ -16,6 +16,10 @@ class ConvBlock(nn.Module):
 
             nn.Conv1d(hidden_features, hidden_features, kernel_size, padding='same'),
             nn.BatchNorm1d(num_features=hidden_features),
+            nn.LeakyReLU(negative_slope=0.01),
+
+            nn.Conv1d(hidden_features, hidden_features, kernel_size, padding='same'),
+            nn.BatchNorm1d(num_features=hidden_features),
             nn.LeakyReLU(negative_slope=0.01)
         )
 

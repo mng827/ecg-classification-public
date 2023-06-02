@@ -1,19 +1,18 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import torch
-from torch.utils.data import DataLoader
-import lightning.pytorch as pl
-from data.dataset import EcgDataset
-from data.transforms import GaussianNoise, RandomMask, BaselineWander
-import matplotlib.pyplot as plt
-from cnn_lightning import LightningConv1dModel
-import lightning.pytorch as pl
-from lightning.pytorch.loggers import MLFlowLogger
-from lightning.pytorch.callbacks import EarlyStopping
-import mlflow
 import hydra
 import logging
 import subprocess
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+from torch.utils.data import DataLoader
+import lightning.pytorch as pl
+from lightning.pytorch.loggers import MLFlowLogger
+from lightning.pytorch.callbacks import EarlyStopping
+
+from cnn_lightning import LightningConv1dModel
+from data.dataset import EcgDataset
+from data.transforms import GaussianNoise, RandomMask, BaselineWander
 
 
 logger = logging.getLogger(__name__)
@@ -26,11 +25,12 @@ def main(cfg):
     try:
         git_commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
         git_diff = subprocess.check_output(['git', 'diff', 'HEAD']).decode('ascii').strip()
-
-        mlf_logger.experiment.log_param("git_version", git_commit)
-        mlf_logger.experiment.log_param("git_changes", git_diff)
     except:
         logger.error("Error getting git info")
+
+    mlf_logger.experiment.log_param(mlf_logger.run_id, "git_version", git_commit)
+    # There is a 500 character limit for parameters
+    mlf_logger.experiment.log_param(mlf_logger.run_id, "git_changes", git_diff[:500])
 
     train_df = pd.read_csv(cfg.data.train_csv, header=None)
     test_df = pd.read_csv(cfg.data.test_csv, header=None)
@@ -52,19 +52,18 @@ def main(cfg):
     val_loader = DataLoader(val_dataset, batch_size=cfg.train.batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=cfg.train.batch_size, shuffle=False)
 
-    sample_signal, sample_label = next(iter(train_loader))
-    print(sample_signal.shape, sample_label.shape)
-    classes = ["Normal", "Supraventricular", "Ventricular", "Fusion", "Unknown"]
-    for i in range(sample_signal.shape[0]):
-        plt.clf()
-        plt.plot(sample_signal[i,0])
-        plt.title(classes[sample_label[i]])
-        plt.savefig(f"{i:03d}.png")
+    # Debugging code
+    # sample_signal, sample_label = next(iter(train_loader))
+    # classes = ["Normal", "Supraventricular", "Ventricular", "Fusion", "Unknown"]
+    # for i in range(sample_signal.shape[0]):
+    #     plt.clf()
+    #     plt.plot(sample_signal[i,0])
+    #     plt.title(classes[sample_label[i]])
+    #     plt.savefig(f"{i:03d}.png")
 
     lightning_module = LightningConv1dModel(cfg)
-    lightning_module.save_hyperparameters(cfg)
 
-    early_stopping = EarlyStopping('val_avg_recall', min_delta=0.01, patience=20, mode='max')
+    early_stopping = EarlyStopping('val_avg_f1score', min_delta=0.01, patience=20, mode='max')
 
     trainer = pl.Trainer(limit_train_batches=100,
                          max_epochs=cfg.train.num_epochs,
