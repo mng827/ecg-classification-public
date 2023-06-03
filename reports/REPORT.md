@@ -23,7 +23,7 @@ shows examples of the data augmentation as well as explanations for each.
 # Task 2: Model Training and Fine-tuning
 I chose a 1D convolutional neural network (CNN) model with 11 layers for
 this ECG heartbeat categorization task. Neural networks automatically learn
-features from the data and provides state-of-the-art results in several
+features from the data and provide state-of-the-art results in several
 tasks, especially when there is a lot of data. CNNs in particular have
 translational equivariance properties built-in which makes them suitable
 for image and signal processing tasks: the result of a convolution on a
@@ -76,7 +76,7 @@ may overfit the training data. When this happens, the training loss
 might still be decreasing but the validation loss could be increasing.
 Early stopping stops the training process when some validation metric
 is not moving in the right direction. In this case, I monitor the
-validation average F1 score and stop training if it is not increasing.
+validation average F1-score and stop training if it is not increasing.
 
 I have also added a training callback to reduce the learning rate
 when the validation loss plateaus. This helps in fitting the model.
@@ -85,22 +85,22 @@ beginning but in the later stages, it may cause the model to bounce
 around the local minimum. Decreasing the learning rate would help
 the model reach a local minimum.
 
-From the hyperparameter sweep, the hyperparameters which produced the
-highest validation average F1 score are: cnn kernel size = 5,
-learning rate = 3e-4, and batch size = 512.
-
-![hyperparameter_tuning_table](figures/val_metrics_table.png)
-
 The training and validation loss curves can be visualized through MLflow.
 
 ![train_val_curves](figures/train_val_curves.png)
 
-The huge jump in the average recall and average F1 score curves are
+The huge gaps in the average recall and average F1-score curves are
 likely due to the fact that there are only a few examples for some classes.
+
+From the hyperparameter sweep, the hyperparameters which produced the
+highest validation average F1-score are: cnn kernel size = 5,
+learning rate = 3e-4, and batch size = 512.
+
+![hyperparameter_tuning_table](figures/val_metrics_table.png)
 
 The performance of this model on the test set is as follows:
 
-| Class                 |  Precision  |  Recall  |  F1 Score  |
+| Class                 |  Precision  |  Recall  |  F1-Score  |
 |-----------------------|-------------|----------|------------|
 | Normal (N)            |  0.981      |  0.998   |  0.99      |
 | Supraventricular (S)  |  0.972      |  0.491   |  0.652     |
@@ -113,8 +113,8 @@ The model clearly performs poorer on the classes with less examples:
 Supraventricular (S) and Fusion (F).
 
 Potential ideas for improvement:
-- Oversampling the classes with fewer examples should help the
-model predict these classes better. This can be done by specifying a
+- Oversampling the classes with fewer examples during training should help the
+model learn these classes better. This can be done by specifying a
 Sampler in the PyTorch Dataloader.
 
 # (Optional) Task 3: Testing Holdout Set
@@ -137,20 +137,20 @@ number and are linked to the MLflow run that produced the model.
 For deployment, I believe the best approach is to package the application
 and its dependencies into a container (i.e., Docker container).
 Containerization allows for portability, scalability, and environment
-consistency. Containers can be scaled out quickly using a container
-orchestrator if there is an increase in demand.
+consistency. Containers can be scaled out quickly if there is an
+increase in demand using container orchestration tools.
 
-The script to build the docker container would fetch a specific version
+The script to build the Docker container would fetch a specific version
 of the model from the model registry and copy the code for pre-processing and
 generating predictions to form a complete application.
 
 Monitoring the deployed system is another big task in real world.
 Model predictions would presumably be displayed to the clinicians
-to help them make decisions. However, to avoid bias, clinicians
+to help them make decisions. However, to avoid bias when measuring model performance, clinicians
 should perform the classification independently without seeing the
 model predictions. New data, model predictions on the new data,
 as well as the clinician labels should be recorded in a database.
-On a specific frequency, e.g., once a week, an application would
+At regular intervals, e.g., once a week, an application would
 search through the database and compare model predictions with
 clinician labels to check model performance. These results should
 then be displayed on a dashboard or e-mailed to the model owners.
