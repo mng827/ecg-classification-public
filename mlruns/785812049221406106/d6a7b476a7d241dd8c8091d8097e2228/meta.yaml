@@ -1,0 +1,15 @@
+artifact_uri: /home/mng/ecg-classification/mlruns/785812049221406106/d6a7b476a7d241dd8c8091d8097e2228/artifacts
+end_time: 1685734861149
+entry_point_name: ''
+experiment_id: '785812049221406106'
+lifecycle_stage: active
+run_id: d6a7b476a7d241dd8c8091d8097e2228
+run_name: funny-lynx-277
+run_uuid: d6a7b476a7d241dd8c8091d8097e2228
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1685732491014
+status: 3
+tags: []
+user_id: mng

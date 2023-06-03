@@ -1,0 +1,15 @@
+artifact_uri: /home/mng/ecg-classification/mlruns/785812049221406106/7c86cf16224b4f16969ddd7023bdbcb9/artifacts
+end_time: 1685729233754
+entry_point_name: ''
+experiment_id: '785812049221406106'
+lifecycle_stage: active
+run_id: 7c86cf16224b4f16969ddd7023bdbcb9
+run_name: dazzling-finch-792
+run_uuid: 7c86cf16224b4f16969ddd7023bdbcb9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1685728556918
+status: 3
+tags: []
+user_id: mng

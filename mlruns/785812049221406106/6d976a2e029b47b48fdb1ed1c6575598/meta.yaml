@@ -1,0 +1,15 @@
+artifact_uri: /home/mng/ecg-classification/mlruns/785812049221406106/6d976a2e029b47b48fdb1ed1c6575598/artifacts
+end_time: 1685732490725
+entry_point_name: ''
+experiment_id: '785812049221406106'
+lifecycle_stage: active
+run_id: 6d976a2e029b47b48fdb1ed1c6575598
+run_name: ambitious-pig-141
+run_uuid: 6d976a2e029b47b48fdb1ed1c6575598
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1685731563860
+status: 3
+tags: []
+user_id: mng

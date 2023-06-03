@@ -1,6 +1,6 @@
 # Task 1: Data Processing
 - Exploratory data analysis was done in
-`notebooks/0.0-mng-exploratory-data-analysis.ipynb`.
+[notebooks/0.0-mng-exploratory-data-analysis.ipynb](../notebooks/0.0-mng-exploratory-data-analysis.ipynb).
 
 - There were no missing values on the dataset and so no data
 imputation was performed. If there were missing data, the appropriate
@@ -13,61 +13,109 @@ The main idea is to synthetically create new examples from the training
 data by applying some transformations. This should lead to increased model
 performance since there is more data for the model to learn from.
 Domain knowledge would be helpful in creating appropriate augmentations.
-The code for data augmentation can be found in `src/data/transforms.py`.
+The code for data augmentation can be found in [src/data/transforms.py](../src/data/transforms.py).
 These have parameters such as the magnitude of the noise and can be varied
 when called. We do the data augmentation during training while loading the
 data, to create an "infinite" number of augmentations. The notebook in
-`notebooks/0.1-mng-data-augmentation.ipynb` shows examples of the data
-augmentation as well as explanations for each.
+[notebooks/0.1-mng-data-augmentation.ipynb](../notebooks/0.1-mng-data-augmentation.ipynb)
+shows examples of the data augmentation as well as explanations for each.
 
 # Task 2: Model Training and Fine-tuning
 I chose a 1D convolutional neural network (CNN) model with 11 layers for
 this ECG heartbeat categorization task. Neural networks automatically learn
 features from the data and provides state-of-the-art results in several
-tasks, especially when there is a lot of data.
+tasks, especially when there is a lot of data. CNNs in particular have
+translational equivariance properties built-in which makes them suitable
+for image and signal processing tasks: the result of a convolution on a
+shifted signal is the same as the shifting the convolution of the original
+signal. A challenge with using neural networks is that they require a lot of
+training data and may not generalize to out-of-distribution datasets.
 
-Note: The training/validation split from the training dataset potentially
-has some data leakage. According to the paper on this dataset, the MIT-BIH dataset
-was derived from ECG recordings from 47 subjects. The ECG signals were split
-into 10 second windows and then pre-processed to extract heartbeats. Ideally,
-when splitting the training dataset into training/validation, we split at
-the patient level and then use the heartbeats from the training/validation
-patients. However, I could not find this information.
+To train the model, I split the training dataset into a training and
+validation dataset, stratified by the label.
+
+Note: This training/validation split potentially has some data leakage.
+According to the [paper](https://arxiv.org/abs/1805.00794) on this dataset,
+the MIT-BIH dataset was derived from ECG recordings from 47 subjects.
+The ECG signals were split into 10 second windows and then pre-processed to
+extract heartbeats. Ideally, when splitting the training dataset into
+training/validation, we split at the patient level and then use the heartbeats
+from the training/validation patients. However, I could not find patient
+information from the Kaggle dataset.
 
 I performed hyperparameter tuning by sweeping across the following combinations:
 
-Learning rate: {1e-3, 3e-4}
-Batch size: {256, 512}
 CNN Kernel size: {5, 7}
+
+Learning rate: {1e-3, 3e-4}
+
+Batch size: {256, 512}
 
 This was facilitated with the use of Hydra. We could have swept more parameters
 if we have time.
 
-Early stopping is a technique used to prevent overfitting. Since
-neural networks have way more parameters than training data, it
-may overfit the training data and when this happens, the validation
-loss increases and validation accuracy decreases. Early stopping stops
-the training process when some validation metric is not moving in
-the right direction. In this case, I monitor the validation average
-F1 score.
-
-I have also added a training callback to reduce the learning rate
-when the validation loss plateaus. A high initial learning rate
-helps the model train faster at the beginning but in the later stages,
-it may cause the model to bounce around the local minimum. Reducing
-the learning rate helps in fitting the model.
-
 There are several metrics for multi-class classification problems.
 These include accuracy, precision, recall, and F1-score. Since we
-have a highly imbalanced data, the accuracy will be skewed higher.
-A model which just predicts "normal" for all cases will get high
-accuracy (>80%) instantly. Precision, recall and F1-scores for the
-abnormal classes are therefore important metrics to look at.
+have highly imbalanced data with a lot of "normal" cases, the
+accuracy will be skewed. A model which just predicts "normal" for
+all cases will get high accuracy (>80%) instantly. Precision, recall
+and F1-scores for the abnormal classes are therefore important metrics
+to consider. Briefly, recall measures how much of the positive/disease
+samples the model can detect. (Can the model detect arrhythmias?)
+Precision tells us out of all samples that the model predicted to
+be positive, how many of these are actually positive. (If a model
+predicts a heartbeat to have arrhythmia, does it really have arrythmia?)
+Both metrics are important: high recall means we will not miss
+positive cases and high precision means we will not diagnose a
+lot of cases as positive. The F1-score is a combination of the
+precision and recall.
+
+Early stopping is a technique used to prevent overfitting. Since
+neural networks have way more parameters than training data, it
+may overfit the training data. When this happens, the training loss
+might still be decreasing but the validation loss could be increasing.
+Early stopping stops the training process when some validation metric
+is not moving in the right direction. In this case, I monitor the
+validation average F1 score and stop training if it is not increasing.
+
+I have also added a training callback to reduce the learning rate
+when the validation loss plateaus. This helps in fitting the model.
+A high initial learning rate helps the model train faster at the
+beginning but in the later stages, it may cause the model to bounce
+around the local minimum. Decreasing the learning rate would help
+the model reach a local minimum.
+
+From the hyperparameter sweep, the hyperparameters which produced the
+highest validation average F1 score are: cnn kernel size = 5,
+learning rate = 3e-4, and batch size = 512.
+
+![hyperparameter_tuning_table](figures/val_metrics_table.png)
+
+The training and validation loss curves can be visualized through MLflow.
+
+![train_val_curves](figures/train_val_curves.png)
+
+The huge jump in the average recall and average F1 score curves are
+likely due to the fact that there are only a few examples for some classes.
+
+The performance of this model on the test set is as follows:
+
+| Class                 |  Precision  |  Recall  |  F1 Score  |
+|-----------------------|-------------|----------|------------|
+| Normal (N)            |  0.981      |  0.998   |  0.99      |
+| Supraventricular (S)  |  0.972      |  0.491   |  0.652     |
+| Ventricular (V)       |  0.942      |  0.973   |  0.958     |
+| Fusion (F)            |  0.85       |  0.735   |  0.788     |
+| Unknown (Q)           |  1.0        |  0.968   |  0.984     |
+| Average               |  0.949      |  0.833   |  0.874     |
+
+The model clearly performs poorer on the classes with less examples:
+Supraventricular (S) and Fusion (F).
 
 Potential ideas for improvement:
-- Oversampling the classes with fewer examples might help the
-model predict these better.
-
+- Oversampling the classes with fewer examples should help the
+model predict these classes better. This can be done by specifying a
+Sampler in the PyTorch Dataloader.
 
 # (Optional) Task 3: Testing Holdout Set
 Unfortunately, I did not have time to do this. I believe the main

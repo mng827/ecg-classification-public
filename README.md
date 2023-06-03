@@ -4,7 +4,11 @@ ecg-classification
 ECG heartbeat classification
 
 Install the required packages: `pip install -r requirements.txt`.
+
 The main requirements are: PyTorch, MLflow, Hydra, and PyTorch Lightning
+
+Download the data from https://www.kaggle.com/datasets/shayanfazeli/heartbeat
+and place it in `data/raw/`.
 
 To train a model with hyperparameter sweeps:
 ```
@@ -14,7 +18,7 @@ PYTHONPATH=src python src/models/train_model.py -m train.lr=3e-4,1e-3 train.batc
 You should see a `mlruns` folder after running an experiment. Use `mlflow ui` to
 view the MLflow dashboard.
 
-A short report is in `reports/REPORT.md`
+A short report is in [reports/REPORT.md](reports/REPORT.md).
 
 Project Organization
 ------------

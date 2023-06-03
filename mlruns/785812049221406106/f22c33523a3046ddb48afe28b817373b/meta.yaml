@@ -1,0 +1,15 @@
+artifact_uri: /home/mng/ecg-classification/mlruns/785812049221406106/f22c33523a3046ddb48afe28b817373b/artifacts
+end_time: 1685736024170
+entry_point_name: ''
+experiment_id: '785812049221406106'
+lifecycle_stage: active
+run_id: f22c33523a3046ddb48afe28b817373b
+run_name: rogue-rat-433
+run_uuid: f22c33523a3046ddb48afe28b817373b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1685734861747
+status: 3
+tags: []
+user_id: mng
